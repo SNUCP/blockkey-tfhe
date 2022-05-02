@@ -26,6 +26,7 @@ set(SRCS
     lwe-keyswitch-functions.cpp
     lwe-bootstrapping-functions.cpp
     lwe-bootstrapping-functions-fft.cpp
+    lwe-bootstrapping-functions-sparse.cpp
     tfhe_io.cpp
     tfhe_generic_streams.cpp
     tfhe_garbage_collector.cpp

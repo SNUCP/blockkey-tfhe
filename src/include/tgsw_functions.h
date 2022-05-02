@@ -88,9 +88,11 @@ EXPORT void tGswFFTAddH(TGswSampleFFT *result, const TGswParams *params);
 EXPORT void tGswFFTClear(TGswSampleFFT *result, const TGswParams *params);
 EXPORT void tGswFFTExternMulToTLwe(TLweSample *accum, const TGswSampleFFT *gsw,
                                    const TGswParams *params);
-EXPORT void tGswFFTMulByXaiMinusOne(TGswSampleFFT *result, const int32_t ai,
-                                    const TGswSampleFFT *bki,
-                                    const TGswParams *params);
+EXPORT void tGswFFTMulByXai(TGswSampleFFT *result, const int32_t ai,
+                            const TGswSampleFFT *bki, const TGswParams *params);
+
+EXPORT void tGswFFTAddTo(TGswSampleFFT *result, const TGswSampleFFT *sample,
+                         const TGswParams *params);
 
 EXPORT void tfhe_blindRotate(TLweSample *accum, const TGswSample *bk,
                              const int32_t *bara, const int32_t n,
@@ -118,6 +120,21 @@ EXPORT void tfhe_blindRotateAndExtract_FFT(LweSample *result,
 EXPORT void tfhe_bootstrap_FFT(LweSample *result,
                                const LweBootstrappingKeyFFT *bk, Torus32 mu,
                                const LweSample *x);
+
+EXPORT void tfhe_sparseBlindRotate_FFT(TLweSample *accum,
+                                       const TGswSampleFFT *bk,
+                                       const int32_t *bara, const int32_t n,
+                                       const int32_t hw,
+                                       const TGswParams *bk_params);
+EXPORT void tfhe_sparseBlindRotateAndExtract_FFT(
+    LweSample *result, const TorusPolynomial *v, const TGswSampleFFT *bk,
+    const int32_t barb, const int32_t *bara, const int32_t n, const int32_t hw,
+    const TGswParams *bk_params);
+
+EXPORT void tfhe_sparseBootstrap_FFT(LweSample *result, const int32_t hw,
+                                     const LweBootstrappingKeyFFT *bk,
+                                     Torus32 mu, const LweSample *x);
+
 // EXPORT void tfhe_bootstrapFFT(LweSample* result, const
 // LweBootstrappingKeyFFT* bk, Torus32 mu1, Torus32 mu0, const LweSample* x);
 // EXPORT void tfhe_createLweBootstrappingKeyFFT(LweBootstrappingKeyFFT* bk,

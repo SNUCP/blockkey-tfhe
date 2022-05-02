@@ -123,18 +123,6 @@ EXPORT void tGswAddMuIntH(TGswSample *result, const int32_t message,
 }
 #endif
 
-#if defined INCLUDE_ALL || defined INCLUDE_TGSW_ADD_MU_INT_H
-#undef INCLUDE_TGSW_ADD_MU_INT_H
-// Result += sample
-EXPORT void tGswAddTo(TGswSample *result, const TGswSample *sample,
-                      const TGswParams *params) {
-  const TLweParams *par = params->tlwe_params;
-  const int32_t kpl = params->kpl;
-  for (int32_t i = 0; i < kpl; i++)
-    tLweAddTo(&result->all_sample[i], &sample->all_sample[i], par);
-}
-#endif
-
 #if defined INCLUDE_ALL || defined INCLUDE_TGSW_ENCRYPT_ZERO
 #undef INCLUDE_TGSW_ENCRYPT_ZERO
 // Result = tGsw(0)

@@ -96,4 +96,7 @@ EXPORT void tLweFFTAddMulRTo(TLweSampleFFT *result,
                              const TLweSampleFFT *sample,
                              const TLweParams *params);
 
+EXPORT void tLweFFTAddTo(TLweSampleFFT *result, const TLweSampleFFT *sample,
+                         const TLweParams *params);
+
 #endif // TLWE_FUNCTIONS_H

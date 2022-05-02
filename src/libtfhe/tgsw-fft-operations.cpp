@@ -3,22 +3,22 @@
 TGSW fft operations
 *************************************************** */
 
+#include "lagrangehalfc_arithmetic.h"
+#include "lwe-functions.h"
+#include "lwebootstrappingkey.h"
+#include "lwekey.h"
+#include "lweparams.h"
+#include "lwesamples.h"
+#include "numeric_functions.h"
+#include "polynomials_arithmetic.h"
+#include "tfhe_core.h"
+#include "tgsw_functions.h"
+#include "tlwe_functions.h"
+#include <cassert>
+#include <ccomplex>
 #include <cstdlib>
 #include <iostream>
 #include <random>
-#include <cassert>
-#include <ccomplex>
-#include "tfhe_core.h"
-#include "numeric_functions.h"
-#include "lweparams.h"
-#include "lwekey.h"
-#include "lwesamples.h"
-#include "lwe-functions.h"
-#include "tlwe_functions.h"
-#include "tgsw_functions.h"
-#include "polynomials_arithmetic.h"
-#include "lagrangehalfc_arithmetic.h"
-#include "lwebootstrappingkey.h"
 
 using namespace std;
 #else
@@ -26,116 +26,129 @@ using namespace std;
 #define EXPORT
 #endif
 
-
-//constructor content
+// constructor content
 EXPORT void init_TGswSampleFFT(TGswSampleFFT *obj, const TGswParams *params) {
-    const int32_t k = params->tlwe_params->k;
-    const int32_t l = params->l;
-    TLweSampleFFT *all_samples = new_TLweSampleFFT_array((k + 1) * l, params->tlwe_params);
-    new(obj) TGswSampleFFT(params, all_samples);
+  const int32_t k = params->tlwe_params->k;
+  const int32_t l = params->l;
+  TLweSampleFFT *all_samples =
+      new_TLweSampleFFT_array((k + 1) * l, params->tlwe_params);
+  new (obj) TGswSampleFFT(params, all_samples);
 }
 
-//destructor content
+// destructor content
 EXPORT void destroy_TGswSampleFFT(TGswSampleFFT *obj) {
-    int32_t k = obj->k;
-    int32_t l = obj->l;
-    delete_TLweSampleFFT_array((k + 1) * l, obj->all_samples);
-    obj->~TGswSampleFFT();
+  int32_t k = obj->k;
+  int32_t l = obj->l;
+  delete_TLweSampleFFT_array((k + 1) * l, obj->all_samples);
+  obj->~TGswSampleFFT();
 }
 
+// For all the kpl TLWE samples composing the TGSW sample
+// It computes the inverse FFT of the coefficients of the TLWE sample
+EXPORT void tGswToFFTConvert(TGswSampleFFT *result, const TGswSample *source,
+                             const TGswParams *params) {
+  const int32_t kpl = params->kpl;
 
-// For all the kpl TLWE samples composing the TGSW sample 
-// It computes the inverse FFT of the coefficients of the TLWE sample   
-EXPORT void tGswToFFTConvert(TGswSampleFFT *result, const TGswSample *source, const TGswParams *params) {
-    const int32_t kpl = params->kpl;
-
-    for (int32_t p = 0; p < kpl; p++)
-        tLweToFFTConvert(result->all_samples + p, source->all_sample + p, params->tlwe_params);
+  for (int32_t p = 0; p < kpl; p++)
+    tLweToFFTConvert(result->all_samples + p, source->all_sample + p,
+                     params->tlwe_params);
 }
 
-// For all the kpl TLWE samples composing the TGSW sample 
+// For all the kpl TLWE samples composing the TGSW sample
 // It computes the FFT of the coefficients of the TLWEfft sample
-EXPORT void tGswFromFFTConvert(TGswSample *result, const TGswSampleFFT *source, const TGswParams *params) {
-    const int32_t kpl = params->kpl;
+EXPORT void tGswFromFFTConvert(TGswSample *result, const TGswSampleFFT *source,
+                               const TGswParams *params) {
+  const int32_t kpl = params->kpl;
 
-    for (int32_t p = 0; p < kpl; p++)
-        tLweFromFFTConvert(result->all_sample + p, source->all_samples + p, params->tlwe_params);
+  for (int32_t p = 0; p < kpl; p++)
+    tLweFromFFTConvert(result->all_sample + p, source->all_samples + p,
+                       params->tlwe_params);
 }
-
-
 
 // result = result + H
 EXPORT void tGswFFTAddH(TGswSampleFFT *result, const TGswParams *params) {
-    const int32_t k = params->tlwe_params->k;
-    const int32_t l = params->l;
+  const int32_t k = params->tlwe_params->k;
+  const int32_t l = params->l;
 
-    for (int32_t j = 0; j < l; j++) {
-        Torus32 hj = params->h[j];
-        for (int32_t i = 0; i <= k; i++)
-            LagrangeHalfCPolynomialAddTorusConstant(&result->sample[i][j].a[i], hj);
-    }
-
+  for (int32_t j = 0; j < l; j++) {
+    Torus32 hj = params->h[j];
+    for (int32_t i = 0; i <= k; i++)
+      LagrangeHalfCPolynomialAddTorusConstant(&result->sample[i][j].a[i], hj);
+  }
 }
 
 // result = list of TLWE (0,0)
 EXPORT void tGswFFTClear(TGswSampleFFT *result, const TGswParams *params) {
-    const int32_t kpl = params->kpl;
+  const int32_t kpl = params->kpl;
 
-    for (int32_t p = 0; p < kpl; p++)
-        tLweFFTClear(result->all_samples + p, params->tlwe_params);
+  for (int32_t p = 0; p < kpl; p++)
+    tLweFFTClear(result->all_samples + p, params->tlwe_params);
 }
 
-// External product (*): accum = gsw (*) accum 
-EXPORT void tGswFFTExternMulToTLwe(TLweSample *accum, const TGswSampleFFT *gsw, const TGswParams *params) {
-    const TLweParams *tlwe_params = params->tlwe_params;
-    const int32_t k = tlwe_params->k;
-    const int32_t l = params->l;
-    const int32_t kpl = params->kpl;
-    const int32_t N = tlwe_params->N;
-    //TODO attention, improve these new/delete...
-    IntPolynomial *deca = new_IntPolynomial_array(kpl, N); //decomposed accumulator
-    LagrangeHalfCPolynomial *decaFFT = new_LagrangeHalfCPolynomial_array(kpl, N); //fft version
-    TLweSampleFFT *tmpa = new_TLweSampleFFT(tlwe_params);
+// External product (*): accum = gsw (*) accum
+EXPORT void tGswFFTExternMulToTLwe(TLweSample *accum, const TGswSampleFFT *gsw,
+                                   const TGswParams *params) {
+  const TLweParams *tlwe_params = params->tlwe_params;
+  const int32_t k = tlwe_params->k;
+  const int32_t l = params->l;
+  const int32_t kpl = params->kpl;
+  const int32_t N = tlwe_params->N;
+  // TODO attention, improve these new/delete...
+  IntPolynomial *deca =
+      new_IntPolynomial_array(kpl, N); // decomposed accumulator
+  LagrangeHalfCPolynomial *decaFFT =
+      new_LagrangeHalfCPolynomial_array(kpl, N); // fft version
+  TLweSampleFFT *tmpa = new_TLweSampleFFT(tlwe_params);
 
-    for (int32_t i = 0; i <= k; i++)
-        tGswTorus32PolynomialDecompH(deca + i * l, accum->a + i, params);
-    for (int32_t p = 0; p < kpl; p++)
-        IntPolynomial_ifft(decaFFT + p, deca + p);
+  for (int32_t i = 0; i <= k; i++)
+    tGswTorus32PolynomialDecompH(deca + i * l, accum->a + i, params);
+  for (int32_t p = 0; p < kpl; p++)
+    IntPolynomial_ifft(decaFFT + p, deca + p);
 
-    tLweFFTClear(tmpa, tlwe_params);
-    for (int32_t p = 0; p < kpl; p++) {
-        tLweFFTAddMulRTo(tmpa, decaFFT + p, gsw->all_samples + p, tlwe_params);
-    }
-    tLweFromFFTConvert(accum, tmpa, tlwe_params);
+  tLweFFTClear(tmpa, tlwe_params);
+  for (int32_t p = 0; p < kpl; p++) {
+    tLweFFTAddMulRTo(tmpa, decaFFT + p, gsw->all_samples + p, tlwe_params);
+  }
+  tLweFromFFTConvert(accum, tmpa, tlwe_params);
 
-    delete_TLweSampleFFT(tmpa);
-    delete_LagrangeHalfCPolynomial_array(kpl, decaFFT);
-    delete_IntPolynomial_array(kpl, deca);
+  delete_TLweSampleFFT(tmpa);
+  delete_LagrangeHalfCPolynomial_array(kpl, decaFFT);
+  delete_IntPolynomial_array(kpl, deca);
 }
 
-// result = (X^ai -1)*bki  
-/*
-//This function is not used, but may become handy in a future release
+// result = (X^ai -1)*bki
+// This function is not used, but may become handy in a future release
 //
-EXPORT void tGswFFTMulByXaiMinusOne(TGswSampleFFT* result, const int32_t ai, const TGswSampleFFT* bki, const TGswParams* params) {
-    const TLweParams* tlwe_params=params->tlwe_params;
-    const int32_t k = tlwe_params->k;
-    //const int32_t l = params->l;
-    const int32_t kpl = params->kpl;
-    const int32_t N = tlwe_params->N;
-    //on calcule x^ai-1 en fft
-    //TODO attention, this prevents parallelization...
-    //TODO: parallelization
-    static LagrangeHalfCPolynomial* xaim1=new_LagrangeHalfCPolynomial(N);
-    LagrangeHalfCPolynomialSetXaiMinusOne(xaim1,ai);
-    for (int32_t p=0; p<kpl; p++) {
-        const LagrangeHalfCPolynomial* in_s = bki->all_samples[p].a;
-        LagrangeHalfCPolynomial* out_s = result->all_samples[p].a;
-        for (int32_t j=0; j<=k; j++)
-            LagrangeHalfCPolynomialMul(&out_s[j], xaim1, &in_s[j]); 
-    }
+EXPORT void tGswFFTMulByXai(TGswSampleFFT *result, const int32_t ai,
+                            const TGswSampleFFT *bki,
+                            const TGswParams *params) {
+  const TLweParams *tlwe_params = params->tlwe_params;
+  const int32_t k = tlwe_params->k;
+  // const int32_t l = params->l;
+  const int32_t kpl = params->kpl;
+  const int32_t N = tlwe_params->N;
+  // on calcule x^ai-1 en fft
+  // TODO attention, this prevents parallelization...
+  // TODO: parallelization
+  static LagrangeHalfCPolynomial *xaim1 = new_LagrangeHalfCPolynomial(N);
+  LagrangeHalfCPolynomialSetXaiMinusOne(xaim1, ai);
+  for (int32_t p = 0; p < kpl; p++) {
+    const LagrangeHalfCPolynomial *in_s = bki->all_samples[p].a;
+    LagrangeHalfCPolynomial *out_s = result->all_samples[p].a;
+    for (int32_t j = 0; j <= k; j++)
+      LagrangeHalfCPolynomialMul(&out_s[j], xaim1, &in_s[j]);
+  }
 }
-*/
+
+// Result += sample
+EXPORT void tGswFFTAddTo(TGswSampleFFT *result, const TGswSampleFFT *sample,
+                         const TGswParams *params) {
+  const TLweParams *par = params->tlwe_params;
+  const int32_t kpl = params->kpl;
+
+  for (int32_t i = 0; i < kpl; i++)
+    tLweFFTAddTo(&result->all_samples[i], &sample->all_samples[i], par);
+}
 
 //-------------------------------------------------------------------------------------
 // autogenerated memory-related functions
@@ -145,12 +158,6 @@ USE_DEFAULT_CONSTRUCTOR_DESTRUCTOR_IMPLEMENTATIONS1(TGswSampleFFT, TGswParams);
 
 //
 //----------------------------------------------------------------------------------------
-
-
-
-
-
-
 
 #if 0
 // BOOTSTRAPPING (as in CGGI16b - algo 3)
