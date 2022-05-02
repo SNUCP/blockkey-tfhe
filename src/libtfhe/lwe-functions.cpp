@@ -33,7 +33,7 @@ EXPORT void lweKeyGen(LweKey *result) {
 EXPORT void lweSparseKeyGen(LweKey *result, int32_t hw) {
   const int32_t n = result->params->n;
   const int32_t d = n / hw;
-  uniform_int_distribution<int32_t> distribution(0, d);
+  uniform_int_distribution<int32_t> distribution(0, d - 1);
 
   for (int32_t i = 0; i < hw; i++) {
     for (int32_t j = 0; j < d; j++) {

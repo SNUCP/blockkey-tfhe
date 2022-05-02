@@ -91,6 +91,9 @@ int32_t main(int32_t argc, char **argv) {
   for (int32_t i = 0; i < nb_samples; ++i) {
     Torus32 phase = lwePhase(test_out + i, keyset->lwe_key);
     cout << "sparse out phase " << i << " = " << t32tod(phase) << endl;
+
+    phase = lwePhase(test_in + i, keyset->lwe_key);
+    cout << "sparse in phase " << i << " = " << t32tod(phase) << endl;
   }
 
   end = clock();

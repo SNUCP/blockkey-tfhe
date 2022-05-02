@@ -104,10 +104,10 @@ EXPORT void tLweFFTAddTo(TLweSampleFFT *result, const TLweSampleFFT *sample,
                          const TLweParams *params) {
   const int32_t k = params->k;
 
-  for (int32_t i = 0; i < k; i++)
+  for (int32_t i = 0; i <= k; i++)
     LagrangeHalfCPolynomialAddTo(result->a + i, sample->a + i);
 
-  LagrangeHalfCPolynomialAddTo(result->b, sample->b);
+  // LagrangeHalfCPolynomialAddTo(result->b, sample->b);
   // result->current_variance += sample->current_variance;
   // TODO: how to compute the variance correctly?
 }

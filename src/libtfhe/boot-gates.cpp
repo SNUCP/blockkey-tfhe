@@ -51,6 +51,33 @@ EXPORT void bootsNAND(LweSample *result, const LweSample *ca,
 }
 
 /*
+ * Homomorphic bootstrapped NAND gate
+ * Takes in input 2 LWE samples (with message space [-1/8,1/8], noise<1/16)
+ * Outputs a LWE bootstrapped sample (with message space [-1/8,1/8], noise<1/16)
+ */
+EXPORT void bootsSparseNAND(LweSample *result, const LweSample *ca,
+                            const LweSample *cb,
+                            const TFheGateBootstrappingCloudKeySet *bk) {
+  static const Torus32 MU = modSwitchToTorus32(1, 8);
+  const LweParams *in_out_params = bk->params->in_out_params;
+
+  LweSample *temp_result = new_LweSample(in_out_params);
+
+  // compute: (0,1/8) - ca - cb
+  static const Torus32 NandConst = modSwitchToTorus32(1, 8);
+  lweNoiselessTrivial(temp_result, NandConst, in_out_params);
+  lweSubTo(temp_result, ca, in_out_params);
+  lweSubTo(temp_result, cb, in_out_params);
+
+  // if the phase is positive, the result is 1/8
+  // if the phase is positive, else the result is -1/8
+  const int32_t hw = bk->params->hw;
+  tfhe_sparseBootstrap_FFT(result, hw, bk->bkFFT, MU, temp_result);
+
+  delete_LweSample(temp_result);
+}
+
+/*
  * Homomorphic bootstrapped OR gate
  * Takes in input 2 LWE samples (with message space [-1/8,1/8], noise<1/16)
  * Outputs a LWE bootstrapped sample (with message space [-1/8,1/8], noise<1/16)
