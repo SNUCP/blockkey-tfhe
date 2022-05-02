@@ -1,34 +1,28 @@
-#include <cstdlib>
-#include <iostream>
-#include "tfhe_core.h"
 #include "lwebootstrappingkey.h"
-#include "lwekeyswitch.h"
 #include "lwe-functions.h"
+#include "lwekeyswitch.h"
+#include "tfhe_core.h"
 #include "tgsw.h"
 #include "tgsw_functions.h"
-
+#include <cstdlib>
+#include <iostream>
 
 using namespace std;
 
-LweBootstrappingKey::LweBootstrappingKey(const LweParams* in_out_params, 
-    const TGswParams* bk_params,
-    const TLweParams* accum_params,
-    const LweParams* extract_params,
-    TGswSample* bk,
-    LweKeySwitchKey* ks): in_out_params(in_out_params), 
-    bk_params(bk_params),
-    accum_params(accum_params),
-    extract_params(extract_params),
-    bk(bk), ks(ks) {}
+LweBootstrappingKey::LweBootstrappingKey(const LweParams *in_out_params,
+                                         const TGswParams *bk_params,
+                                         const TLweParams *accum_params,
+                                         const LweParams *extract_params,
+                                         TGswSample *bk, LweKeySwitchKey *ks)
+    : in_out_params(in_out_params), bk_params(bk_params),
+      accum_params(accum_params), extract_params(extract_params), bk(bk),
+      ks(ks) {}
 
 LweBootstrappingKey::~LweBootstrappingKey() {}
 
-
-
-
 /*
-LweBootstrappingKeyFFT::LweBootstrappingKeyFFT(const LweParams* in_out_params, const TGswParams* bk_params) {
-    this->in_out_params = in_out_params;
+LweBootstrappingKeyFFT::LweBootstrappingKeyFFT(const LweParams* in_out_params,
+const TGswParams* bk_params) { this->in_out_params = in_out_params;
     this->bk_params= bk_params;
     this->accum_params= bk_params->tlwe_params;
     this->extract_params=&accum_params->extracted_lweparams;
@@ -45,31 +39,17 @@ LweBootstrappingKeyFFT::~LweBootstrappingKeyFFT() {
 }
 */
 
-
-
-
-
-
 /*
  * LweBootstrappingKey is converted to a BootstrappingKeyFFT
  */
-LweBootstrappingKeyFFT::LweBootstrappingKeyFFT(const LweParams* in_out_params, 
-    const TGswParams* bk_params,
-    const TLweParams* accum_params,
-    const LweParams* extract_params, 
-    const TGswSampleFFT* bkFFT,
-    const LweKeySwitchKey* ks): in_out_params(in_out_params), 
-    bk_params(bk_params), 
-    accum_params(accum_params), 
-    extract_params(extract_params),
-    bkFFT(bkFFT), ks(ks) {}
-
+LweBootstrappingKeyFFT::LweBootstrappingKeyFFT(const LweParams *in_out_params,
+                                               const TGswParams *bk_params,
+                                               const TLweParams *accum_params,
+                                               const LweParams *extract_params,
+                                               const TGswSampleFFT *bkFFT,
+                                               const LweKeySwitchKey *ks)
+    : in_out_params(in_out_params), bk_params(bk_params),
+      accum_params(accum_params), extract_params(extract_params), bkFFT(bkFFT),
+      ks(ks) {}
 
 LweBootstrappingKeyFFT::~LweBootstrappingKeyFFT() {}
- 
-
-
-
-
-
-
