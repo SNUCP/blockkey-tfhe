@@ -54,7 +54,7 @@ EXPORT void tfhe_sparseBlindRotate_FFT(TLweSample *accum,
       int32_t idx = i * d + j;
       const int32_t barai = bara[idx];
 
-      if (idx == 0) {
+      if (j == 0) {
         tGswFFTMulByXai(temp1, barai, bkFFT + idx, bk_params);
       } else {
         tGswFFTMulByXai(temp2, barai, bkFFT + idx, bk_params);

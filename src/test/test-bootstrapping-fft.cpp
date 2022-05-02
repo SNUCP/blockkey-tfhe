@@ -62,23 +62,23 @@ int32_t main(int32_t argc, char **argv) {
   // output samples
   LweSample *test_out = new_LweSample_array(nb_samples, in_out_params);
 
+  clock_t begin, end;
+
   // bootstrap input samples
   cout << "starting bootstrapping..." << endl;
-  clock_t begin = clock();
+  begin = clock();
   for (int32_t i = 0; i < nb_samples; ++i) {
     tfhe_bootstrap_FFT(test_out + i, keyset->cloud.bkFFT, mu_boot, test_in + i);
   }
-  clock_t end = clock();
+  end = clock();
   cout << "finished " << nb_samples << " bootstrappings" << endl;
   cout << "time per bootstrapping (microsecs)... "
        << (end - begin) / double(nb_samples) << endl;
 
-  /*
   for (int32_t i = 0; i < nb_samples; ++i) {
-      Torus32 phase = lwePhase(test_out + i, keyset->lwe_key);
-      cout << "phase " << i << " = " << t32tod(phase) << endl;
+    Torus32 phase = lwePhase(test_out + i, keyset->lwe_key);
+    cout << "out phase " << i << " = " << t32tod(phase) << endl;
   }
-  */
 
   // bootstrap input samples
   cout << "starting sparse bootstrapping..." << endl;
@@ -86,6 +86,11 @@ int32_t main(int32_t argc, char **argv) {
   for (int32_t i = 0; i < nb_samples; ++i) {
     tfhe_sparseBootstrap_FFT(test_out + i, keyset->params->hw,
                              keyset->cloud.bkFFT, mu_boot, test_in + i);
+  }
+
+  for (int32_t i = 0; i < nb_samples; ++i) {
+    Torus32 phase = lwePhase(test_out + i, keyset->lwe_key);
+    cout << "sparse out phase " << i << " = " << t32tod(phase) << endl;
   }
 
   end = clock();
