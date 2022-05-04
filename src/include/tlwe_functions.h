@@ -7,6 +7,9 @@
 
 // Ring
 EXPORT void tLweKeyGen(TLweKey *result);
+
+EXPORT void tLweSparseKeyGen(TLweKey *result);
+
 EXPORT void tLweSymEncrypt(TLweSample *result, TorusPolynomial *message,
                            double alpha, const TLweKey *key);
 EXPORT void tLweSymEncryptT(TLweSample *result, Torus32 message, double alpha,

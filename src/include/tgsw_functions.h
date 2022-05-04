@@ -11,6 +11,9 @@
 
 // Gsw
 EXPORT void tGswKeyGen(TGswKey *result);
+
+EXPORT void tGswSparseKeyGen(TGswKey *result);
+
 EXPORT void tGswSymEncrypt(TGswSample *result, const IntPolynomial *message,
                            double alpha, const TGswKey *key);
 EXPORT void tGswSymEncryptInt(TGswSample *result, const int32_t message,

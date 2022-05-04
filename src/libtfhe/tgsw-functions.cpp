@@ -57,6 +57,10 @@ EXPORT void destroy_TGswSample(TGswSample *obj) {
 EXPORT void tGswKeyGen(TGswKey *result) { tLweKeyGen(&result->tlwe_key); }
 #endif
 
+EXPORT void tGswSparseKeyGen(TGswKey *result) {
+  tLweSparseKeyGen(&result->tlwe_key);
+}
+
 #if defined INCLUDE_ALL || defined INCLUDE_TGSW_CLEAR
 #undef INCLUDE_TGSW_CLEAR
 // support Functions for TGsw
