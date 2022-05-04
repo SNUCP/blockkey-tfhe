@@ -50,17 +50,20 @@ EXPORT void tfhe_sparseBlindRotate_FFT(TLweSample *accum,
   TGswSampleFFT *temp2 = new_TGswSampleFFT(bk_params);
 
   for (int32_t i = 0; i < hw; i++) {
-    for (int32_t j = 0; j < d; j++) {
+    const int32_t baraj = bara[(i + 1) * d - 1];
+    for (int32_t j = 0; j < d - 1; j++) {
       int32_t idx = i * d + j;
       const int32_t barai = bara[idx];
 
       if (j == 0) {
-        tGswFFTMulByXai(temp1, barai, bkFFT + idx, bk_params);
+        tGswFFTMulByXaiMinusOne(temp1, barai - baraj, bkFFT + idx, bk_params);
       } else {
-        tGswFFTMulByXai(temp2, barai, bkFFT + idx, bk_params);
+        tGswFFTMulByXaiMinusOne(temp2, barai - baraj, bkFFT + idx, bk_params);
         tGswFFTAddTo(temp1, temp2, bk_params);
       }
     }
+
+    tGswFFTAddH(temp1, bk_params);
 
     tGswFFTExternMulToTLwe(accum, temp1, bk_params);
   }
@@ -96,11 +99,25 @@ EXPORT void tfhe_sparseBlindRotateAndExtract_FFT(
   // Accumulator
   TLweSample *acc = new_TLweSample(accum_params);
 
+  int32_t temp = _2N - barb;
+  const int32_t d = n / hw;
+
+  for (int32_t i = 0; i < hw; i++) {
+    temp += bara[i * d + d - 1];
+  }
+
+  temp %= _2N;
+
   // testvector = X^{2N-barb}*v
+  /*
   if (barb != 0)
     torusPolynomialMulByXai(testvectbis, _2N - barb, v);
   else
     torusPolynomialCopy(testvectbis, v);
+  */
+
+  torusPolynomialMulByXai(testvectbis, temp, v);
+
   tLweNoiselessTrivial(acc, testvectbis, accum_params);
   // Blind rotation
   tfhe_sparseBlindRotate_FFT(acc, bk, bara, n, hw, bk_params);

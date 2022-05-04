@@ -116,12 +116,12 @@ EXPORT void tGswFFTExternMulToTLwe(TLweSample *accum, const TGswSampleFFT *gsw,
   delete_IntPolynomial_array(kpl, deca);
 }
 
-// result = (X^ai -1)*bki
+// result = (X^ai-1)*bki
 // This function is not used, but may become handy in a future release
 //
-EXPORT void tGswFFTMulByXai(TGswSampleFFT *result, const int32_t ai,
-                            const TGswSampleFFT *bki,
-                            const TGswParams *params) {
+EXPORT void tGswFFTMulByXaiMinusOne(TGswSampleFFT *result, const int32_t ai,
+                                    const TGswSampleFFT *bki,
+                                    const TGswParams *params) {
   const TLweParams *tlwe_params = params->tlwe_params;
   const int32_t k = tlwe_params->k;
   // const int32_t l = params->l;

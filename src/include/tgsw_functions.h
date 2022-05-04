@@ -88,8 +88,9 @@ EXPORT void tGswFFTAddH(TGswSampleFFT *result, const TGswParams *params);
 EXPORT void tGswFFTClear(TGswSampleFFT *result, const TGswParams *params);
 EXPORT void tGswFFTExternMulToTLwe(TLweSample *accum, const TGswSampleFFT *gsw,
                                    const TGswParams *params);
-EXPORT void tGswFFTMulByXai(TGswSampleFFT *result, const int32_t ai,
-                            const TGswSampleFFT *bki, const TGswParams *params);
+EXPORT void tGswFFTMulByXaiMinusOne(TGswSampleFFT *result, const int32_t ai,
+                                    const TGswSampleFFT *bki,
+                                    const TGswParams *params);
 
 EXPORT void tGswFFTAddTo(TGswSampleFFT *result, const TGswSampleFFT *sample,
                          const TGswParams *params);

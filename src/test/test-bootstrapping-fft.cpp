@@ -75,25 +75,12 @@ int32_t main(int32_t argc, char **argv) {
   cout << "time per bootstrapping (microsecs)... "
        << (end - begin) / double(nb_samples) << endl;
 
-  for (int32_t i = 0; i < nb_samples; ++i) {
-    Torus32 phase = lwePhase(test_out + i, keyset->lwe_key);
-    cout << "out phase " << i << " = " << t32tod(phase) << endl;
-  }
-
   // bootstrap input samples
   cout << "starting sparse bootstrapping..." << endl;
   begin = clock();
   for (int32_t i = 0; i < nb_samples; ++i) {
     tfhe_sparseBootstrap_FFT(test_out + i, keyset->params->hw,
                              keyset->cloud.bkFFT, mu_boot, test_in + i);
-  }
-
-  for (int32_t i = 0; i < nb_samples; ++i) {
-    Torus32 phase = lwePhase(test_out + i, keyset->lwe_key);
-    cout << "sparse out phase " << i << " = " << t32tod(phase) << endl;
-
-    phase = lwePhase(test_in + i, keyset->lwe_key);
-    cout << "sparse in phase " << i << " = " << t32tod(phase) << endl;
   }
 
   end = clock();

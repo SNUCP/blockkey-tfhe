@@ -31,7 +31,7 @@ FFT_Processor_Spqlios::FFT_Processor_Spqlios(const int32_t N)
   for (int32_t revi = rev1; revi < rev3; revi++)
     reva[revi - rev1] = rev(revi, _2N);
   for (int32_t j = 0; j < _2N; j++) {
-    cosomegaxminus1[j] = cos(2 * M_PI * j / _2N);
+    cosomegaxminus1[j] = cos(2 * M_PI * j / _2N) - 1.0;
     sinomegaxminus1[j] = sin(2 * M_PI * j / _2N);
   }
 }
