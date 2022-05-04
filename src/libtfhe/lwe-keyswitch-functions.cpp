@@ -114,6 +114,28 @@ void lweKeySwitchTranslate_fromArray(LweSample *result, const LweSample ***ks,
   }
 }
 
+void lweSparseKeySwitchTranslate_fromArray(LweSample *result,
+                                           const LweSample ***ks,
+                                           const LweParams *params,
+                                           const Torus32 *ai, const int32_t n,
+                                           const int32_t t,
+                                           const int32_t basebit) {
+  const int32_t base = 1 << basebit; // base=2 in [CGGI16]
+  const int32_t prec_offset = 1 << (32 - (1 + basebit * t)); // precision
+  const int32_t mask = base - 1;
+
+  for (int32_t i = 0; i < n; i += 2) {
+    const Torus32 temp = ai[i] - ai[i + 1];
+    const uint32_t aibar = temp + prec_offset;
+    for (int32_t j = 0; j < t; j++) {
+      const uint32_t aij = (aibar >> (32 - (j + 1) * basebit)) & mask;
+      if (aij != 0) {
+        lweSubTo(result, &ks[i][j][aij], params);
+      }
+    }
+  }
+}
+
 EXPORT void lweCreateKeySwitchKey_old(LweKeySwitchKey *result,
                                       const LweKey *in_key,
                                       const LweKey *out_key) {
@@ -204,6 +226,24 @@ EXPORT void lweKeySwitch(LweSample *result, const LweKeySwitchKey *ks,
   lweNoiselessTrivial(result, sample->b, params);
   lweKeySwitchTranslate_fromArray(result, (const LweSample ***)ks->ks, params,
                                   sample->a, n, t, basebit);
+}
+
+// sample=(a',b')
+EXPORT void lweSparseKeySwitch(LweSample *result, const LweKeySwitchKey *ks,
+                               const LweSample *sample) {
+  const LweParams *params = ks->out_params;
+  const int32_t n = ks->n;
+  const int32_t basebit = ks->basebit;
+  const int32_t t = ks->t;
+
+  Torus32 temp = sample->b;
+  for (int32_t i = 0; i < n; i += 2) {
+    temp -= sample->a[i + 1];
+  }
+
+  lweNoiselessTrivial(result, temp, params);
+  lweSparseKeySwitchTranslate_fromArray(result, (const LweSample ***)ks->ks,
+                                        params, sample->a, n, t, basebit);
 }
 
 /**

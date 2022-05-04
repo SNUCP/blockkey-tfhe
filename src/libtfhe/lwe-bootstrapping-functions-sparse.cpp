@@ -188,7 +188,7 @@ EXPORT void tfhe_sparseBootstrap_FFT(LweSample *result, const int32_t hw,
 
   tfhe_sparseBootstrap_woKS_FFT(u, hw, bk, mu, x);
   // Key switching
-  lweKeySwitch(result, bk->ks, u);
+  lweSparseKeySwitch(result, bk->ks, u);
 
   delete_LweSample(u);
 }

@@ -97,4 +97,6 @@ EXPORT void lweCreateKeySwitchKey(LweKeySwitchKey *result, const LweKey *in_key,
 EXPORT void lweKeySwitch(LweSample *result, const LweKeySwitchKey *ks,
                          const LweSample *sample);
 
+EXPORT void lweSparseKeySwitch(LweSample *result, const LweKeySwitchKey *ks,
+                               const LweSample *sample);
 #endif // Lwe_FUNCTIONS_H
