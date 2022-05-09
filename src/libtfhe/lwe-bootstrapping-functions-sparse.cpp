@@ -55,14 +55,13 @@ EXPORT void tfhe_sparseBlindRotate_FFT(TLweSample *accum,
       int32_t idx = i * d + j;
       const int32_t barai = bara[idx];
 
-      // if barai == baraj we don't need to mult GSW key
-      if (barai == baraj) {
-        continue;
-      }
-
       if (j == 0) {
         tGswFFTMulByXaiMinusOne(temp1, barai - baraj, bkFFT + idx, bk_params);
       } else {
+        // if barai == baraj we don't need to mult GSW key
+        if (barai == baraj) {
+          continue;
+        }
         tGswFFTMulByXaiMinusOne(temp2, barai - baraj, bkFFT + idx, bk_params);
         tGswFFTAddTo(temp1, temp2, bk_params);
       }
@@ -113,15 +112,11 @@ EXPORT void tfhe_sparseBlindRotateAndExtract_FFT(
 
   temp %= _2N;
 
-  // testvector = X^{2N-barb}*v
-  /*
-  if (barb != 0)
-    torusPolynomialMulByXai(testvectbis, _2N - barb, v);
+  // testvector = X^{temp}*v
+  if (temp != 0)
+    torusPolynomialMulByXai(testvectbis, temp, v);
   else
     torusPolynomialCopy(testvectbis, v);
-  */
-
-  torusPolynomialMulByXai(testvectbis, temp, v);
 
   tLweNoiselessTrivial(acc, testvectbis, accum_params);
   // Blind rotation
