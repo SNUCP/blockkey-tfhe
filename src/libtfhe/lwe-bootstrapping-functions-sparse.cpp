@@ -55,6 +55,11 @@ EXPORT void tfhe_sparseBlindRotate_FFT(TLweSample *accum,
       int32_t idx = i * d + j;
       const int32_t barai = bara[idx];
 
+      // if barai == baraj we don't need to mult GSW key
+      if (barai == baraj) {
+        continue;
+      }
+
       if (j == 0) {
         tGswFFTMulByXaiMinusOne(temp1, barai - baraj, bkFFT + idx, bk_params);
       } else {
