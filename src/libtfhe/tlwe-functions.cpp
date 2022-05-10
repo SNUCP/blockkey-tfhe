@@ -24,13 +24,15 @@ EXPORT void tLweKeyGen(TLweKey *result) {
 EXPORT void tLweSparseKeyGen(TLweKey *result) {
   const int32_t N = result->params->N;
   const int32_t k = result->params->k;
-  uniform_int_distribution<int32_t> distribution(0, 1);
+  uniform_int_distribution<int32_t> distribution(0, 3);
 
   for (int32_t i = 0; i < k; ++i) {
-    for (int32_t j = 0; j < N; j += 2) {
+    for (int32_t j = 0; j < N; j += 4) {
       int32_t r = distribution(generator);
       result->key[i].coefs[j] = 0;
       result->key[i].coefs[j + 1] = 0;
+      result->key[i].coefs[j + 2] = 0;
+      result->key[i].coefs[j + 3] = 0;
       result->key[i].coefs[j + r] = 1;
     }
   }

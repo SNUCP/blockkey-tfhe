@@ -124,13 +124,15 @@ void lweSparseKeySwitchTranslate_fromArray(LweSample *result,
   const int32_t prec_offset = 1 << (32 - (1 + basebit * t)); // precision
   const int32_t mask = base - 1;
 
-  for (int32_t i = 0; i < n; i += 2) {
-    const Torus32 temp = ai[i] - ai[i + 1];
-    const uint32_t aibar = temp + prec_offset;
-    for (int32_t j = 0; j < t; j++) {
-      const uint32_t aij = (aibar >> (32 - (j + 1) * basebit)) & mask;
-      if (aij != 0) {
-        lweSubTo(result, &ks[i][j][aij], params);
+  for (int32_t i = 0; i < n; i += 4) {
+    for (int32_t k = 0; k < 3; k++) {
+      const Torus32 temp = ai[i + k] - ai[i + 3];
+      const uint32_t aibar = temp + prec_offset;
+      for (int32_t j = 0; j < t; j++) {
+        const uint32_t aij = (aibar >> (32 - (j + 1) * basebit)) & mask;
+        if (aij != 0) {
+          lweSubTo(result, &ks[i + k][j][aij], params);
+        }
       }
     }
   }
@@ -237,8 +239,8 @@ EXPORT void lweSparseKeySwitch(LweSample *result, const LweKeySwitchKey *ks,
   const int32_t t = ks->t;
 
   Torus32 temp = sample->b;
-  for (int32_t i = 0; i < n; i += 2) {
-    temp -= sample->a[i + 1];
+  for (int32_t i = 0; i < n; i += 4) {
+    temp -= sample->a[i + 3];
   }
 
   lweNoiselessTrivial(result, temp, params);
