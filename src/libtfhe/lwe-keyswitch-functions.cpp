@@ -128,12 +128,31 @@ void lweSparseKeySwitchTranslate_fromArray(LweSample *result,
     for (int32_t k = 0; k < 3; k++) {
       const Torus32 temp = ai[i + k] - ai[i + 3];
       const uint32_t aibar = temp + prec_offset;
-      for (int32_t j = 0; j < t; j++) {
-        const uint32_t aij = (aibar >> (32 - (j + 1) * basebit)) & mask;
+      uint32_t carry = 0;
+      for (int32_t j = t - 1; j >= 0; j--) {
+        const uint32_t aij =
+            ((aibar >> (32 - (j + 1) * basebit)) & mask) + carry;
+        if (aij == 0) {
+          carry = 0;
+          continue;
+        }
+
+        if (aij < (uint32_t)base / 2) {
+          lweSubTo(result, &ks[i + k][j][aij], params);
+          carry = 0;
+        } else {
+          lweAddTo(result, &ks[i + k][j][base - aij], params);
+          carry = 1;
+        }
+      }
+      /*
+      for (int32_t j = t - 1; j >= 0; j--) {
+        const uint32_t aij = ((aibar >> (32 - (j + 1) * basebit)) & mask);
         if (aij != 0) {
           lweSubTo(result, &ks[i + k][j][aij], params);
         }
       }
+      */
     }
   }
 }

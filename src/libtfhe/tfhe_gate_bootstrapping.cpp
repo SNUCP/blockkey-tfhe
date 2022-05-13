@@ -62,8 +62,8 @@ default_128bit_gate_bootstrapping_parameters() {
   static const int32_t hw = 158;
   static const int32_t bk_l = 3;
   static const int32_t bk_Bgbit = 7;
-  static const int32_t ks_basebit = 2;
-  static const int32_t ks_length = 8;
+  static const int32_t ks_basebit = 4;
+  static const int32_t ks_length = 4;
   static const double ks_stdev = pow(2., -15); // standard deviation
   static const double bk_stdev = pow(2., -25);
   ; // standard deviation

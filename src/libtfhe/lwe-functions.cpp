@@ -151,17 +151,6 @@ EXPORT void lweNoiselessTrivial(LweSample *result, Torus32 mu,
   result->current_variance = 0.;
 }
 
-/** result = result + sample */
-EXPORT void lweAddTo(LweSample *result, const LweSample *sample,
-                     const LweParams *params) {
-  const int32_t n = params->n;
-
-  for (int32_t i = 0; i < n; ++i)
-    result->a[i] += sample->a[i];
-  result->b += sample->b;
-  result->current_variance += sample->current_variance;
-}
-
 #ifdef __AVX2__
 /** r -= a  using avx instructions (of size n, not necessarily multiple of 8) */
 EXPORT void __attribute__((noinline))
@@ -218,6 +207,60 @@ intVecSubTo_avx(int32_t *r, const int32_t *a, int64_t n) {
   );
 }
 
+EXPORT void __attribute__((noinline))
+intVecAddTo_avx(int32_t *r, const int32_t *a, int64_t n) {
+  __asm__ __volatile__(
+      //"pushq %%r8\n"               //save clobbered regs
+      //"pushq %%r9\n"
+      "movq %%rdx,%%rax\n"
+      "andq $0xFFFFFFFFFFFFFFF8,%%rax\n" // r8: n0 = n - n%8
+      "leaq (%%rsi,%%rax,4),%%rcx\n"     // r9: aend = a + 4n0
+      "1:\n"
+      "vmovdqu (%%rdi),%%ymm0\n"
+      "vmovdqu (%%rsi),%%ymm1\n"
+      "vpaddd %%ymm1,%%ymm0,%%ymm0\n"
+      "vmovdqu %%ymm0,(%%rdi)\n"
+      "addq $32,%%rdi\n"   // advance r by 8*4
+      "addq $32,%%rsi\n"   // advance a by 8*4
+      "cmpq %%rcx,%%rsi\n" // until aend
+      "jb 1b\n"
+      "vzeroall\n"
+      "subq %%rax,%%rdx\n" // n = n - n0 (between 0 and 7)
+      "cmpq $4,%%rdx\n"    // last 4 operands?
+      "jb 2f\n"
+      "vmovdqu (%%rdi),%%xmm0\n"
+      "vmovdqu (%%rsi),%%xmm1\n"
+      "vpaddd %%xmm1,%%xmm0,%%xmm0\n"
+      "vmovdqu %%xmm0,(%%rdi)\n"
+      "addq $16,%%rdi\n" // advance r by 4*4
+      "addq $16,%%rsi\n" // advance a by 4*4
+      "subq $4,%%rdx\n"  // n = n - 4
+      "2:"
+      "cmpq $2,%%rdx\n" // last 2 operands?
+      "jb 3f\n"
+      "movq (%%rdi),%%xmm0\n"
+      "movq (%%rsi),%%xmm1\n"
+      "paddd %%xmm1,%%xmm0\n"
+      "movq %%xmm0,(%%rdi)\n"
+      "addq $8,%%rdi\n" // advance r by 2*4
+      "addq $8,%%rsi\n" // advance a by 2*4
+      "subq $2,%%rdx\n" // n = n - 2
+      "3:"
+      "cmpq $1,%%rdx\n" // last 1 operand?
+      "jb 4f\n"
+      "movl (%%rdi),%%eax\n"
+      "movl (%%rsi),%%ecx\n"
+      "addl %%ecx,%%eax\n"
+      "movl %%eax,(%%rdi)\n"
+      "4:"
+      //"popq %%rcx\n"
+      //"popq %%r8\n"
+      : "=D"(r), "=S"(a), "=d"(n) // output
+      : "D"(r), "S"(a), "d"(n)    // input
+      : "%rax", "%rcx"            // clobber list (don't mess up with it)
+  );
+}
+
 int32_t intVecSubTo_avx_test() {
   fprintf(stderr, "testint intVecSubTo_avx\n");
   static int32_t tst[1000];
@@ -258,6 +301,30 @@ EXPORT void lweSubTo(LweSample *result, const LweSample *sample,
     ra[i] -= sa[i];
 #endif
   result->b -= sample->b;
+  result->current_variance += sample->current_variance;
+}
+
+/** result = result + sample */
+EXPORT void lweAddTo(LweSample *result, const LweSample *sample,
+                     const LweParams *params) {
+  const int32_t n = params->n;
+
+  const Torus32 *__restrict sa = sample->a;
+  Torus32 *__restrict ra = result->a;
+
+#ifdef __AVX2__
+  intVecAddTo_avx(ra, sa, n);
+#else
+  for (int32_t i = 0; i < n; ++i)
+    ra[i] += sa[i];
+#endif
+
+  /*
+  for (int32_t i = 0; i < n; ++i)
+    ra[i] += sa[i];
+  */
+
+  result->b += sample->b;
   result->current_variance += sample->current_variance;
 }
 
