@@ -1,4 +1,5 @@
 #include "lagrangehalfc_arithmetic.h"
+#include "lwekey.h"
 #include "numeric_functions.h"
 #include "polynomials_arithmetic.h"
 #include "tfhe_generic_templates.h"
@@ -21,19 +22,19 @@ EXPORT void tLweKeyGen(TLweKey *result) {
       result->key[i].coefs[j] = distribution(generator);
 }
 
-EXPORT void tLweSparseKeyGen(TLweKey *result) {
+EXPORT void tLweSparseKeyGen(const LweKey *lwe_key, TLweKey *result) {
   const int32_t N = result->params->N;
   const int32_t k = result->params->k;
-  uniform_int_distribution<int32_t> distribution(0, 3);
+  const int32_t n = lwe_key->params->n;
+
+  uniform_int_distribution<int32_t> distribution(0, 1);
 
   for (int32_t i = 0; i < k; ++i) {
-    for (int32_t j = 0; j < N; j += 4) {
-      int32_t r = distribution(generator);
-      result->key[i].coefs[j] = 0;
-      result->key[i].coefs[j + 1] = 0;
-      result->key[i].coefs[j + 2] = 0;
-      result->key[i].coefs[j + 3] = 0;
-      result->key[i].coefs[j + r] = 1;
+    for (int32_t j = 0; j < n; j++) {
+      result->key[i].coefs[j] = lwe_key->key[j];
+    }
+    for (int32_t j = n; j < N; j++) {
+      result->key[i].coefs[j] = distribution(generator);
     }
   }
 }

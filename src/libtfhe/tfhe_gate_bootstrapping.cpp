@@ -58,7 +58,7 @@ default_128bit_gate_bootstrapping_parameters() {
   // attack models)
   static const int32_t N = 1024;
   static const int32_t k = 1;
-  static const int32_t hw = 63;
+  static const int32_t hw = 126;
   static const int32_t n = 630;
   static const int32_t bk_l = 3;
   static const int32_t bk_Bgbit = 7;
@@ -111,8 +111,10 @@ new_random_gate_bootstrapping_secret_keyset(
     const TFheGateBootstrappingParameterSet *params) {
   LweKey *lwe_key = new_LweKey(params->in_out_params);
   lweSparseKeyGen(lwe_key, params->hw);
+
   TGswKey *tgsw_key = new_TGswKey(params->tgsw_params);
-  tGswSparseKeyGen(tgsw_key);
+  tGswSparseKeyGen(lwe_key, tgsw_key);
+
   LweBootstrappingKey *bk =
       new_LweBootstrappingKey(params->ks_t, params->ks_basebit,
                               params->in_out_params, params->tgsw_params);

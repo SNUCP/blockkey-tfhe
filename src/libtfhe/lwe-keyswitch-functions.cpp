@@ -123,36 +123,25 @@ void lweSparseKeySwitchTranslate_fromArray(LweSample *result,
   const int32_t base = 1 << basebit; // base=2 in [CGGI16]
   const int32_t prec_offset = 1 << (32 - (1 + basebit * t)); // precision
   const int32_t mask = base - 1;
+  const int32_t n_out = params->n;
 
-  for (int32_t i = 0; i < n; i += 4) {
-    for (int32_t k = 0; k < 3; k++) {
-      const Torus32 temp = ai[i + k] - ai[i + 3];
-      const uint32_t aibar = temp + prec_offset;
-      uint32_t carry = 0;
-      for (int32_t j = t - 1; j >= 0; j--) {
-        const uint32_t aij =
-            ((aibar >> (32 - (j + 1) * basebit)) & mask) + carry;
-        if (aij == 0) {
-          carry = 0;
-          continue;
-        }
+  for (int32_t i = n_out; i < n; i++) {
+    const uint32_t aibar = ai[i] + prec_offset;
+    uint32_t carry = 0;
+    for (int32_t j = t - 1; j >= 0; j--) {
+      const uint32_t aij = ((aibar >> (32 - (j + 1) * basebit)) & mask) + carry;
+      if (aij == 0) {
+        carry = 0;
+        continue;
+      }
 
-        if (aij < (uint32_t)base / 2) {
-          lweSubTo(result, &ks[i + k][j][aij], params);
-          carry = 0;
-        } else {
-          lweAddTo(result, &ks[i + k][j][base - aij], params);
-          carry = 1;
-        }
+      if (aij < (uint32_t)base / 2) {
+        lweSubTo(result, &ks[i][j][aij], params);
+        carry = 0;
+      } else {
+        lweAddTo(result, &ks[i][j][base - aij], params);
+        carry = 1;
       }
-      /*
-      for (int32_t j = t - 1; j >= 0; j--) {
-        const uint32_t aij = ((aibar >> (32 - (j + 1) * basebit)) & mask);
-        if (aij != 0) {
-          lweSubTo(result, &ks[i + k][j][aij], params);
-        }
-      }
-      */
     }
   }
 }
@@ -262,7 +251,9 @@ EXPORT void lweSparseKeySwitch(LweSample *result, const LweKeySwitchKey *ks,
     temp -= sample->a[i + 3];
   }
 
-  lweNoiselessTrivial(result, temp, params);
+  lweNoiselessTrivial(result, 0, params);
+  lweAddTo(result, sample, params);
+
   lweSparseKeySwitchTranslate_fromArray(result, (const LweSample ***)ks->ks,
                                         params, sample->a, n, t, basebit);
 }
