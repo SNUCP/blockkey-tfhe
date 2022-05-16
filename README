@@ -1,0 +1,6 @@
+HOW TO BUILD
+
+1. mkdir build
+2. cd build
+3. cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=off -DCMAKE_BUILD_TYPE=optim
+4. make
