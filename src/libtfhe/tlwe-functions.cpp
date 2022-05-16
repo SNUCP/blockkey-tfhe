@@ -22,7 +22,7 @@ EXPORT void tLweKeyGen(TLweKey *result) {
       result->key[i].coefs[j] = distribution(generator);
 }
 
-EXPORT void tLweSparseKeyGen(const LweKey *lwe_key, TLweKey *result) {
+EXPORT void tLweSparseKeyGen(TLweKey *result, const LweKey *lwe_key) {
   const int32_t N = result->params->N;
   const int32_t k = result->params->k;
   const int32_t n = lwe_key->params->n;

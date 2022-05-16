@@ -113,7 +113,7 @@ new_random_gate_bootstrapping_secret_keyset(
   lweSparseKeyGen(lwe_key, params->hw);
 
   TGswKey *tgsw_key = new_TGswKey(params->tgsw_params);
-  tGswSparseKeyGen(lwe_key, tgsw_key);
+  tGswSparseKeyGen(tgsw_key, lwe_key);
 
   LweBootstrappingKey *bk =
       new_LweBootstrappingKey(params->ks_t, params->ks_basebit,

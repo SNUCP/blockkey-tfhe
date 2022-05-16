@@ -246,13 +246,7 @@ EXPORT void lweSparseKeySwitch(LweSample *result, const LweKeySwitchKey *ks,
   const int32_t basebit = ks->basebit;
   const int32_t t = ks->t;
 
-  Torus32 temp = sample->b;
-  for (int32_t i = 0; i < n; i += 4) {
-    temp -= sample->a[i + 3];
-  }
-
-  lweNoiselessTrivial(result, 0, params);
-  lweAddTo(result, sample, params);
+  lweCopy(result, sample, params);
 
   lweSparseKeySwitchTranslate_fromArray(result, (const LweSample ***)ks->ks,
                                         params, sample->a, n, t, basebit);
