@@ -50,19 +50,18 @@ EXPORT void tfhe_sparseBlindRotate_FFT(TLweSample *accum,
   TGswSampleFFT *temp2 = new_TGswSampleFFT(bk_params);
 
   for (int32_t i = 0; i < hw; i++) {
-    const int32_t baraj = bara[(i + 1) * d - 1];
-    for (int32_t j = 0; j < d - 1; j++) {
+    for (int32_t j = 0; j < d; j++) {
       int32_t idx = i * d + j;
       const int32_t barai = bara[idx];
 
       if (j == 0) {
-        tGswFFTMulByXaiMinusOne(temp1, barai - baraj, bkFFT + idx, bk_params);
+        tGswFFTMulByXaiMinusOne(temp1, barai, bkFFT + idx, bk_params);
       } else {
         // if barai == baraj we don't need to mult GSW key
-        if (barai == baraj) {
+        if (barai == 0) {
           continue;
         }
-        tGswFFTMulByXaiMinusOne(temp2, barai - baraj, bkFFT + idx, bk_params);
+        tGswFFTMulByXaiMinusOne(temp2, barai, bkFFT + idx, bk_params);
         tGswFFTAddTo(temp1, temp2, bk_params);
       }
     }
@@ -103,14 +102,14 @@ EXPORT void tfhe_sparseBlindRotateAndExtract_FFT(
   // Accumulator
   TLweSample *acc = new_TLweSample(accum_params);
 
-  int32_t temp = _2N - barb;
+  int32_t temp = (_2N - barb) % _2N;
+  /*
   const int32_t d = n / hw;
 
   for (int32_t i = 0; i < hw; i++) {
     temp += bara[i * d + d - 1];
   }
-
-  temp %= _2N;
+  */
 
   // testvector = X^{temp}*v
   if (temp != 0)
