@@ -42,37 +42,15 @@ EXPORT void tfhe_sparseBlindRotate_FFT(TLweSample *accum,
                                        const TGswSampleFFT *bkFFT,
                                        const int32_t *bara, const int32_t n,
                                        const int32_t hw,
+                                       const TLweParams *params,
                                        const TGswParams *bk_params) {
 
-  // TGswSampleFFT* temp = new_TGswSampleFFT(bk_params);
   const int32_t d = n / hw;
-  TGswSampleFFT *temp1 = new_TGswSampleFFT(bk_params);
-  TGswSampleFFT *temp2 = new_TGswSampleFFT(bk_params);
 
   for (int32_t i = 0; i < hw; i++) {
-    for (int32_t j = 0; j < d; j++) {
-      int32_t idx = i * d + j;
-      const int32_t barai = bara[idx];
-
-      if (j == 0) {
-        tGswFFTMulByXaiMinusOne(temp1, barai, bkFFT + idx, bk_params);
-      } else {
-        // if barai == baraj we don't need to mult GSW key
-        if (barai == 0) {
-          continue;
-        }
-        tGswFFTMulByXaiMinusOne(temp2, barai, bkFFT + idx, bk_params);
-        tGswFFTAddTo(temp1, temp2, bk_params);
-      }
-    }
-
-    tGswFFTAddH(temp1, bk_params);
-
-    tGswFFTExternMulToTLwe(accum, temp1, bk_params);
+    tGswFFTExternMulToTLweHoisting(accum, bkFFT + (i * d), bara + (i * d), d,
+                                   bk_params);
   }
-
-  delete_TGswSampleFFT(temp1);
-  delete_TGswSampleFFT(temp2);
 }
 #endif
 
@@ -119,7 +97,7 @@ EXPORT void tfhe_sparseBlindRotateAndExtract_FFT(
 
   tLweNoiselessTrivial(acc, testvectbis, accum_params);
   // Blind rotation
-  tfhe_sparseBlindRotate_FFT(acc, bk, bara, n, hw, bk_params);
+  tfhe_sparseBlindRotate_FFT(acc, bk, bara, n, hw, accum_params, bk_params);
   // Extraction
   tLweExtractLweSample(result, acc, extract_params, accum_params);
 

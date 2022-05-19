@@ -91,6 +91,12 @@ EXPORT void tGswFFTAddH(TGswSampleFFT *result, const TGswParams *params);
 EXPORT void tGswFFTClear(TGswSampleFFT *result, const TGswParams *params);
 EXPORT void tGswFFTExternMulToTLwe(TLweSample *accum, const TGswSampleFFT *gsw,
                                    const TGswParams *params);
+
+EXPORT void tGswFFTExternMulToTLweHoisting(TLweSample *accum,
+                                           const TGswSampleFFT *gsw,
+                                           const int32_t *bara, const int32_t d,
+                                           const TGswParams *params);
+
 EXPORT void tGswFFTMulByXaiMinusOne(TGswSampleFFT *result, const int32_t ai,
                                     const TGswSampleFFT *bki,
                                     const TGswParams *params);
@@ -129,6 +135,7 @@ EXPORT void tfhe_sparseBlindRotate_FFT(TLweSample *accum,
                                        const TGswSampleFFT *bk,
                                        const int32_t *bara, const int32_t n,
                                        const int32_t hw,
+                                       const TLweParams *params,
                                        const TGswParams *bk_params);
 EXPORT void tfhe_sparseBlindRotateAndExtract_FFT(
     LweSample *result, const TorusPolynomial *v, const TGswSampleFFT *bk,

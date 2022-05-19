@@ -100,6 +100,21 @@ EXPORT void tLweFFTAddMulRTo(TLweSampleFFT *result,
 }
 #endif
 
+EXPORT void tLweFFTMulXaiMinusOne(TLweSampleFFT *result, int32_t ai,
+                                  const TLweSampleFFT *sample,
+                                  const TLweParams *params) {
+  const int32_t k = params->k;
+  const int32_t N = params->N;
+
+  static LagrangeHalfCPolynomial *xaim1 = new_LagrangeHalfCPolynomial(N);
+  LagrangeHalfCPolynomialSetXaiMinusOne(xaim1, ai);
+
+  for (int32_t i = 0; i <= k; i++)
+    LagrangeHalfCPolynomialMul(result->a + i, xaim1, sample->a + i);
+  // result->current_variance += sample->current_variance;
+  // TODO: how to compute the variance correctly?
+}
+
 EXPORT void tLweFFTAddTo(TLweSampleFFT *result, const TLweSampleFFT *sample,
                          const TLweParams *params) {
   const int32_t k = params->k;

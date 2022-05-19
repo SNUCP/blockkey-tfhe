@@ -102,4 +102,8 @@ EXPORT void tLweFFTAddMulRTo(TLweSampleFFT *result,
 EXPORT void tLweFFTAddTo(TLweSampleFFT *result, const TLweSampleFFT *sample,
                          const TLweParams *params);
 
+EXPORT void tLweFFTMulXaiMinusOne(TLweSampleFFT *result, int32_t ai,
+                                  const TLweSampleFFT *sample,
+                                  const TLweParams *params);
+
 #endif // TLWE_FUNCTIONS_H

@@ -116,6 +116,55 @@ EXPORT void tGswFFTExternMulToTLwe(TLweSample *accum, const TGswSampleFFT *gsw,
   delete_IntPolynomial_array(kpl, deca);
 }
 
+// External product (*): accum = gsw (*) accum
+EXPORT void tGswFFTExternMulToTLweHoisting(TLweSample *accum,
+                                           const TGswSampleFFT *gsw,
+                                           const int32_t *bara, const int32_t d,
+                                           const TGswParams *params) {
+  const TLweParams *tlwe_params = params->tlwe_params;
+  const int32_t k = tlwe_params->k;
+  const int32_t l = params->l;
+  const int32_t kpl = params->kpl;
+  const int32_t N = tlwe_params->N;
+  // TODO attention, improve these new/delete...
+  IntPolynomial *deca =
+      new_IntPolynomial_array(kpl, N); // decomposed accumulator
+  LagrangeHalfCPolynomial *decaFFT =
+      new_LagrangeHalfCPolynomial_array(kpl, N); // fft version
+  TLweSampleFFT *temp_fft1 = new_TLweSampleFFT(tlwe_params);
+  TLweSampleFFT *temp_fft2 = new_TLweSampleFFT(tlwe_params);
+  TLweSample *temp = new_TLweSample(tlwe_params);
+
+  // TLweSample *temp2 = new_TLweSample(tlwe_params);
+
+  for (int32_t i = 0; i <= k; i++)
+    tGswTorus32PolynomialDecompH(deca + i * l, accum->a + i, params);
+  for (int32_t p = 0; p < kpl; p++)
+    IntPolynomial_ifft(decaFFT + p, deca + p);
+
+  tLweFFTClear(temp_fft1, tlwe_params);
+  for (int32_t i = 0; i < d; i++) {
+
+    tLweFFTClear(temp_fft2, tlwe_params);
+    for (int32_t p = 0; p < kpl; p++) {
+      tLweFFTAddMulRTo(temp_fft2, decaFFT + p, (gsw + i)->all_samples + p,
+                       tlwe_params);
+    }
+
+    tLweFFTMulXaiMinusOne(temp_fft2, bara[i], temp_fft2, tlwe_params);
+    tLweFFTAddTo(temp_fft1, temp_fft2, tlwe_params);
+  }
+
+  tLweFromFFTConvert(temp, temp_fft1, tlwe_params);
+  tLweAddTo(accum, temp, tlwe_params);
+
+  delete_TLweSampleFFT(temp_fft1);
+  delete_TLweSampleFFT(temp_fft2);
+  delete_TLweSample(temp);
+  delete_LagrangeHalfCPolynomial_array(kpl, decaFFT);
+  delete_IntPolynomial_array(kpl, deca);
+}
+
 // result = (X^ai-1)*bki
 // This function is not used, but may become handy in a future release
 //

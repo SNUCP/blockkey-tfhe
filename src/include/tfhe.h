@@ -69,11 +69,14 @@ EXPORT void tfhe_sparseBlindRotate_FFT(TLweSample *accum,
                                        const TGswSampleFFT *bk,
                                        const int32_t *bara, const int32_t n,
                                        const int32_t hw,
+                                       const TLweParams *params,
                                        const TGswParams *bk_params);
+
 EXPORT void tfhe_sparseBlindRotateAndExtract_FFT(
     LweSample *result, const TorusPolynomial *v, const TGswSampleFFT *bk,
     const int32_t barb, const int32_t *bara, const int32_t n, const int32_t hw,
     const TGswParams *bk_params);
+
 EXPORT void tfhe_sparseBootstrap_woKS_FFT(LweSample *result, const int32_t hw,
                                           const LweBootstrappingKeyFFT *bk,
                                           Torus32 mu, const LweSample *x);
