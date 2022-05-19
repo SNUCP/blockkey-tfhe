@@ -100,9 +100,9 @@ EXPORT void tLweFFTAddMulRTo(TLweSampleFFT *result,
 }
 #endif
 
-EXPORT void tLweFFTMulXaiMinusOne(TLweSampleFFT *result, int32_t ai,
-                                  const TLweSampleFFT *sample,
-                                  const TLweParams *params) {
+EXPORT void tLweFFTMulByXaiMinusOne(TLweSampleFFT *result, int32_t ai,
+                                    const TLweSampleFFT *sample,
+                                    const TLweParams *params) {
   const int32_t k = params->k;
   const int32_t N = params->N;
 

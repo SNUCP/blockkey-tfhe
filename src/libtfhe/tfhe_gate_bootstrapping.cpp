@@ -58,12 +58,12 @@ default_128bit_gate_bootstrapping_parameters() {
   // attack models)
   static const int32_t N = 1024;
   static const int32_t k = 1;
-  static const int32_t hw = 90;
-  static const int32_t n = 630;
+  static const int32_t n = 640;
+  static const int32_t hw = n / 10;
   static const int32_t bk_l = 3;
   static const int32_t bk_Bgbit = 7;
-  static const int32_t ks_basebit = 4;
-  static const int32_t ks_length = 4;
+  static const int32_t ks_basebit = 6;
+  static const int32_t ks_length = 3;
   static const double ks_stdev = pow(2., -15); // standard deviation
   static const double bk_stdev = pow(2., -25);
   ; // standard deviation

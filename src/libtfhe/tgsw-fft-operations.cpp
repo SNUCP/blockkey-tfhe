@@ -145,13 +145,17 @@ EXPORT void tGswFFTExternMulToTLweHoisting(TLweSample *accum,
   tLweFFTClear(temp_fft1, tlwe_params);
   for (int32_t i = 0; i < d; i++) {
 
+    if (bara[i] == 0) {
+      continue;
+    }
+
     tLweFFTClear(temp_fft2, tlwe_params);
     for (int32_t p = 0; p < kpl; p++) {
       tLweFFTAddMulRTo(temp_fft2, decaFFT + p, (gsw + i)->all_samples + p,
                        tlwe_params);
     }
 
-    tLweFFTMulXaiMinusOne(temp_fft2, bara[i], temp_fft2, tlwe_params);
+    tLweFFTMulByXaiMinusOne(temp_fft2, bara[i], temp_fft2, tlwe_params);
     tLweFFTAddTo(temp_fft1, temp_fft2, tlwe_params);
   }
 
