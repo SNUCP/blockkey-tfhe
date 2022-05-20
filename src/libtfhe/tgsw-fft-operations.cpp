@@ -133,7 +133,6 @@ EXPORT void tGswFFTExternMulToTLweHoisting(TLweSample *accum,
       new_LagrangeHalfCPolynomial_array(kpl, N); // fft version
   TLweSampleFFT *temp_fft1 = new_TLweSampleFFT(tlwe_params);
   TLweSampleFFT *temp_fft2 = new_TLweSampleFFT(tlwe_params);
-  TLweSample *temp = new_TLweSample(tlwe_params);
 
   // TLweSample *temp2 = new_TLweSample(tlwe_params);
 
@@ -154,17 +153,13 @@ EXPORT void tGswFFTExternMulToTLweHoisting(TLweSample *accum,
       tLweFFTAddMulRTo(temp_fft2, decaFFT + p, (gsw + i)->all_samples + p,
                        tlwe_params);
     }
-
-    tLweFFTMulByXaiMinusOne(temp_fft2, bara[i], temp_fft2, tlwe_params);
-    tLweFFTAddTo(temp_fft1, temp_fft2, tlwe_params);
+    tLweFFTAddMulByXaiMinusOne(temp_fft1, bara[i], temp_fft2, tlwe_params);
   }
 
-  tLweFromFFTConvert(temp, temp_fft1, tlwe_params);
-  tLweAddTo(accum, temp, tlwe_params);
+  tLweFromFFTConvert(accum, temp_fft1, tlwe_params);
 
   delete_TLweSampleFFT(temp_fft1);
   delete_TLweSampleFFT(temp_fft2);
-  delete_TLweSample(temp);
   delete_LagrangeHalfCPolynomial_array(kpl, decaFFT);
   delete_IntPolynomial_array(kpl, deca);
 }

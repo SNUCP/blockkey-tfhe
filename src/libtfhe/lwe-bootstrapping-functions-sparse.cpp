@@ -15,19 +15,19 @@ using namespace std;
 #define EXPORT
 #endif
 
-/*
 void tfhe_sparseMuxRotate_FFT(TLweSample *result, const TLweSample *accum,
-                              const TGswSampleFFT *bki,
-                              const TGswParams *bk_params) {
+                              const TGswSampleFFT *bki, const int32_t *bara,
+                              const int32_t d, const TGswParams *bk_params) {
   // ACC = BKi*[(X^barai-1)*ACC]+ACC
   // temp = (X^barai-1)*ACC
-  tLweMulByXaiMinusOne(result, barai, accum, bk_params->tlwe_params);
+  tLweCopy(result, accum, bk_params->tlwe_params);
   // temp *= BKi
-  tGswFFTExternMulToTLwe(result, bki, bk_params);
+
+  tGswFFTExternMulToTLweHoisting(result, bki, bara, d, bk_params);
+
   // ACC += temp
   tLweAddTo(result, accum, bk_params->tlwe_params);
 }
-*/
 
 #if defined INCLUDE_ALL || defined INCLUDE_TFHE_BLIND_ROTATE_FFT
 #undef INCLUDE_TFHE_BLIND_ROTATE_FFT
@@ -46,11 +46,21 @@ EXPORT void tfhe_sparseBlindRotate_FFT(TLweSample *accum,
                                        const TGswParams *bk_params) {
 
   const int32_t d = n / hw;
+  TLweSample *temp = new_TLweSample(bk_params->tlwe_params);
+  TLweSample *temp2 = temp;
+  TLweSample *temp3 = accum;
 
   for (int32_t i = 0; i < hw; i++) {
-    tGswFFTExternMulToTLweHoisting(accum, bkFFT + (i * d), bara + (i * d), d,
-                                   bk_params);
+
+    tfhe_sparseMuxRotate_FFT(temp2, temp3, bkFFT + i * d, bara + i * d, d,
+                             bk_params);
+    swap(temp2, temp3);
   }
+  if (temp3 != accum) {
+    tLweCopy(accum, temp3, bk_params->tlwe_params);
+  }
+
+  delete_TLweSample(temp);
 }
 #endif
 

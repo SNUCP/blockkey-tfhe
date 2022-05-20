@@ -59,7 +59,7 @@ default_128bit_gate_bootstrapping_parameters() {
   static const int32_t N = 1024;
   static const int32_t k = 1;
   static const int32_t n = 640;
-  static const int32_t hw = n / 10;
+  static const int32_t hw = n / 8;
   static const int32_t bk_l = 3;
   static const int32_t bk_Bgbit = 7;
   static const int32_t ks_basebit = 6;
