@@ -58,12 +58,45 @@ default_128bit_gate_bootstrapping_parameters() {
   // attack models)
   static const int32_t N = 1024;
   static const int32_t k = 1;
-  static const int32_t n = 640;
-  static const int32_t hw = n / 8;
+  static const int32_t n = 630;
+  static const int32_t hw = n / 2;
   static const int32_t bk_l = 3;
   static const int32_t bk_Bgbit = 7;
-  static const int32_t ks_basebit = 6;
-  static const int32_t ks_length = 3;
+  static const int32_t ks_basebit = 2;
+  static const int32_t ks_length = 8;
+  static const double ks_stdev = pow(2., -15); // standard deviation
+  static const double bk_stdev = pow(2., -25);
+  ; // standard deviation
+  static const double max_stdev =
+      0.012467; // max standard deviation for a 1/4 msg space
+
+  LweParams *params_in = new_LweParams(n, ks_stdev, max_stdev);
+  TLweParams *params_accum = new_TLweParams(N, k, bk_stdev, max_stdev);
+  TGswParams *params_bk = new_TGswParams(bk_l, bk_Bgbit, params_accum);
+
+  TfheGarbageCollector::register_param(params_in);
+  TfheGarbageCollector::register_param(params_accum);
+  TfheGarbageCollector::register_param(params_bk);
+
+  return new TFheGateBootstrappingParameterSet(ks_length, ks_basebit, hw,
+                                               params_in, params_bk);
+}
+
+// this is the default and recommended parameter set
+static TFheGateBootstrappingParameterSet *
+default_sparse_gate_bootstrapping_parameters() {
+  // These are the parameter set provided in CGGI2019.
+  // Currently (in 2020), the security of these parameters is estimated to
+  // lambda = 129-bit security (w.r.t bkz-sieve model, + additional hybrid
+  // attack models)
+  static const int32_t N = 1024;
+  static const int32_t k = 1;
+  static const int32_t n = 800;
+  static const int32_t hw = n / 4;
+  static const int32_t bk_l = 3;
+  static const int32_t bk_Bgbit = 7;
+  static const int32_t ks_basebit = 4;
+  static const int32_t ks_length = 4;
   static const double ks_stdev = pow(2., -15); // standard deviation
   static const double bk_stdev = pow(2., -25);
   ; // standard deviation
@@ -99,6 +132,13 @@ new_default_gate_bootstrapping_parameters(int32_t minimum_lambda) {
   abort();
 }
 
+/** generate default sparse gate bootstrapping parameters */
+EXPORT TFheGateBootstrappingParameterSet *
+new_sparse_gate_bootstrapping_parameters() {
+
+  return default_sparse_gate_bootstrapping_parameters();
+}
+
 /** deletes gate bootstrapping parameters */
 EXPORT void delete_gate_bootstrapping_parameters(
     TFheGateBootstrappingParameterSet *params) {
@@ -108,6 +148,24 @@ EXPORT void delete_gate_bootstrapping_parameters(
 /** generate a gate bootstrapping secret key */
 EXPORT TFheGateBootstrappingSecretKeySet *
 new_random_gate_bootstrapping_secret_keyset(
+    const TFheGateBootstrappingParameterSet *params) {
+  LweKey *lwe_key = new_LweKey(params->in_out_params);
+  lweKeyGen(lwe_key);
+
+  TGswKey *tgsw_key = new_TGswKey(params->tgsw_params);
+  tGswKeyGen(tgsw_key);
+
+  LweBootstrappingKey *bk =
+      new_LweBootstrappingKey(params->ks_t, params->ks_basebit,
+                              params->in_out_params, params->tgsw_params);
+  tfhe_createLweBootstrappingKey(bk, lwe_key, tgsw_key);
+  LweBootstrappingKeyFFT *bkFFT = new_LweBootstrappingKeyFFT(bk);
+  return new TFheGateBootstrappingSecretKeySet(params, bk, bkFFT, lwe_key,
+                                               tgsw_key);
+}
+
+EXPORT TFheGateBootstrappingSecretKeySet *
+new_random_sparse_bootstrapping_secret_keyset(
     const TFheGateBootstrappingParameterSet *params) {
   LweKey *lwe_key = new_LweKey(params->in_out_params);
   lweSparseKeyGen(lwe_key, params->hw);

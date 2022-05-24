@@ -45,13 +45,13 @@ int32_t main(int32_t argc, char **argv) {
   const int32_t nb_trials = 10;
 
   // generate params
-  int32_t minimum_lambda = 100;
   TFheGateBootstrappingParameterSet *params =
-      new_default_gate_bootstrapping_parameters(minimum_lambda);
+      new_sparse_gate_bootstrapping_parameters();
+
   const LweParams *in_out_params = params->in_out_params;
   // generate the secret keyset
   TFheGateBootstrappingSecretKeySet *keyset =
-      new_random_gate_bootstrapping_secret_keyset(params);
+      new_random_sparse_bootstrapping_secret_keyset(params);
 
   for (int32_t trial = 0; trial < nb_trials; ++trial) {
 

@@ -75,6 +75,26 @@ int32_t main(int32_t argc, char **argv) {
   cout << "time per bootstrapping (microsecs)... "
        << (end - begin) / double(nb_samples) << endl;
 
+  delete_LweSample_array(nb_samples, test_out);
+  delete_LweSample_array(nb_samples, test_in);
+  delete_gate_bootstrapping_secret_keyset(keyset);
+  delete_gate_bootstrapping_parameters(params);
+
+  /** sparse boot **/
+  params = new_sparse_gate_bootstrapping_parameters();
+  in_out_params = params->in_out_params;
+  // generate the secret keyset
+  keyset = new_random_sparse_bootstrapping_secret_keyset(params);
+
+  // generate input samples
+  test_in = new_LweSample_array(nb_samples, in_out_params);
+  for (int32_t i = 0; i < nb_samples; ++i) {
+    lweSymEncrypt(test_in + i, modSwitchToTorus32(i, nb_samples), 0.01,
+                  keyset->lwe_key);
+  }
+  // output samples
+  test_out = new_LweSample_array(nb_samples, in_out_params);
+
   // bootstrap input samples
   cout << "starting sparse bootstrapping..." << endl;
   begin = clock();
