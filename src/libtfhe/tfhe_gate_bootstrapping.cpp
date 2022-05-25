@@ -85,14 +85,10 @@ default_128bit_gate_bootstrapping_parameters() {
 // this is the default and recommended parameter set
 static TFheGateBootstrappingParameterSet *
 default_sparse_gate_bootstrapping_parameters() {
-  // These are the parameter set provided in CGGI2019.
-  // Currently (in 2020), the security of these parameters is estimated to
-  // lambda = 129-bit security (w.r.t bkz-sieve model, + additional hybrid
-  // attack models)
   static const int32_t N = 1024;
   static const int32_t k = 1;
-  static const int32_t n = 800;
-  static const int32_t hw = n / 4;
+  static const int32_t n = 687;
+  static const int32_t hw = n / 3;
   static const int32_t bk_l = 3;
   static const int32_t bk_Bgbit = 7;
   static const int32_t ks_basebit = 4;

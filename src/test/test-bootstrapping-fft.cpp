@@ -41,7 +41,7 @@ int32_t main(int32_t argc, char **argv) {
 #ifndef NDEBUG
   cout << "DEBUG MODE!" << endl;
 #endif
-  const int32_t nb_samples = 50;
+  const int32_t nb_samples = 100;
   const Torus32 mu_boot = modSwitchToTorus32(1, 8);
 
   // generate params
