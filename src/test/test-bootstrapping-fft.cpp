@@ -75,8 +75,25 @@ int32_t main(int32_t argc, char **argv) {
   cout << "time per bootstrapping (microsecs)... "
        << (end - begin) / double(nb_samples) << endl;
 
+  delete_LweSample_array(nb_samples, test_in);
+
+  /** keyswitch **/
+  test_in = new_LweSample_array(
+      nb_samples, &keyset->cloud.bkFFT->accum_params->extracted_lweparams);
+
+  cout << "starting key-switching..." << endl;
+  begin = clock();
+  for (int32_t i = 0; i < nb_samples; ++i) {
+    lweKeySwitch(test_out + i, keyset->cloud.bkFFT->ks, test_in + i);
+  }
+  end = clock();
+  cout << "finished " << nb_samples << " key-switching" << endl;
+  cout << "time per key-switching (microsecs)... "
+       << (end - begin) / double(nb_samples) << endl;
+
   delete_LweSample_array(nb_samples, test_out);
   delete_LweSample_array(nb_samples, test_in);
+
   delete_gate_bootstrapping_secret_keyset(keyset);
   delete_gate_bootstrapping_parameters(params);
 
@@ -108,8 +125,25 @@ int32_t main(int32_t argc, char **argv) {
   cout << "time per sparse bootstrapping (microsecs)... "
        << (end - begin) / double(nb_samples) << endl;
 
+  delete_LweSample_array(nb_samples, test_in);
+
+  /** keyswitch **/
+  test_in = new_LweSample_array(
+      nb_samples, &keyset->cloud.bkFFT->accum_params->extracted_lweparams);
+
+  cout << "starting sparse key-switching..." << endl;
+  begin = clock();
+  for (int32_t i = 0; i < nb_samples; ++i) {
+    lweSparseKeySwitch(test_out + i, keyset->cloud.bkFFT->ks, test_in + i);
+  }
+  end = clock();
+  cout << "finished " << nb_samples << " sparse key-switching" << endl;
+  cout << "time per sparse key-switching (microsecs)... "
+       << (end - begin) / double(nb_samples) << endl;
+
   delete_LweSample_array(nb_samples, test_out);
   delete_LweSample_array(nb_samples, test_in);
+
   delete_gate_bootstrapping_secret_keyset(keyset);
   delete_gate_bootstrapping_parameters(params);
 
