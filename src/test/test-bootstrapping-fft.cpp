@@ -24,6 +24,14 @@ void dieDramatically(string message) {
   abort();
 }
 
+void fillRandom(LweSample *result, const LweParams *params) {
+  const int32_t n = params->n;
+  for (int32_t i = 0; i < n; i++)
+    result->a[i] = uniformTorus32_distrib(generator);
+  result->b = uniformTorus32_distrib(generator);
+  result->current_variance = 0.2;
+}
+
 // EXPORT void tLweExtractKey(LweKey* result, const TLweKey* key); //TODO:
 // change the name and put in a .h EXPORT void
 // tfhe_createLweBootstrappingKeyFFT(LweBootstrappingKeyFFT* bk, const LweKey*
@@ -81,6 +89,11 @@ int32_t main(int32_t argc, char **argv) {
   test_in = new_LweSample_array(
       nb_samples, &keyset->cloud.bkFFT->accum_params->extracted_lweparams);
 
+  for (int32_t i = 0; i < nb_samples; ++i) {
+    fillRandom(test_in + i,
+               &keyset->cloud.bkFFT->accum_params->extracted_lweparams);
+  }
+
   cout << "starting key-switching..." << endl;
   begin = clock();
   for (int32_t i = 0; i < nb_samples; ++i) {
@@ -127,9 +140,14 @@ int32_t main(int32_t argc, char **argv) {
 
   delete_LweSample_array(nb_samples, test_in);
 
-  /** keyswitch **/
+  /** sparse keyswitch **/
   test_in = new_LweSample_array(
       nb_samples, &keyset->cloud.bkFFT->accum_params->extracted_lweparams);
+
+  for (int32_t i = 0; i < nb_samples; ++i) {
+    fillRandom(test_in + i,
+               &keyset->cloud.bkFFT->accum_params->extracted_lweparams);
+  }
 
   cout << "starting sparse key-switching..." << endl;
   begin = clock();
