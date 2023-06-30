@@ -9,5 +9,5 @@ This repository is built upon the TFHE library (https://github.com/tfhe/tfhe).
 4. make
 
 <p align="center">
-	<img src="logo.jpeg" />
+	<img src="logo.jpeg" width="600px"> 
 </p>
