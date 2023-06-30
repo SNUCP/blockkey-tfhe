@@ -4,7 +4,7 @@
 
 This repository is built upon the TFHE library (https://github.com/tfhe/tfhe).
 
-#HOW TO BUILD
+# HOW TO BUILD
 
 1. mkdir build
 2. cd build
